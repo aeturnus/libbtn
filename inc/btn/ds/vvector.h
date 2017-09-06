@@ -17,6 +17,7 @@ void VVector_push(VVector* vector, void* ptr);   // Adds value to end
 void* VVector_pop(VVector* vector);              // Pops off value off end
 
 void* VVector_get(VVector* vector, int index);   // Get value from index
+void VVector_set(VVector* vector, int index, void * thing);   // Set value at index
 int VVector_find(VVector* vector, void * thing );   // Find index from pointer
 void VVector_removeAt( VVector* vector, int thing );   // remove at an index
 void VVector_remove( VVector* vector, void * thing );   // remove a thing

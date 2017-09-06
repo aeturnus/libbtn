@@ -127,6 +127,14 @@ void* VVector_get(VVector* thiz, int index)
     return 0x0;
 }
 
+void VVector_set(VVector* thiz, int index, void * thing)
+{
+    if(index < thiz->length)
+    {
+        thiz->array[index] = thing;
+    }
+}
+
 int VVector_find(VVector* thiz, void * thing)
 {
     int length = thiz->length;
