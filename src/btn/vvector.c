@@ -161,6 +161,7 @@ void VVector_removeAt(VVector* thiz, int index )
         arr[i] = arr[i+1];
     }
     arr[length-1] = NULL;
+    thiz->length -= 1;
 }
 
 void VVector_remove(VVector* thiz, void * thing)
