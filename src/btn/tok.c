@@ -41,7 +41,6 @@ static void strtok_wrapper( const char * str, int * pNum, char *** pArray, void 
 
     free( buffer );
     VVector_delete( vec );
-    return vec;
 }
 
 /**

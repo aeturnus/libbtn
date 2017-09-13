@@ -59,7 +59,7 @@ void vector_delete( vector * thiz )
 int vector_realloc( vector * thiz, size_t capacity )
 {
     if (capacity <= thiz->_capacity)
-        return;
+        return 1;
 
     char * new_buffer = (char *)realloc( thiz->_buffer, thiz->_element_size * capacity );
 
