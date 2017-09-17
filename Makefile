@@ -5,7 +5,7 @@ export LIBDIR = $(PROOT)/lib
 
 export CC = gcc
 export LD = ld
-export CFLAGS =-Wall -Wextra -g
+export CFLAGS =-Wall -Wextra -Wno-unused-parameter -g
 export INCLUDE = -I$(PROOT)/inc
 export LIBS   = -L$(LIBDIR) -lbtn
 

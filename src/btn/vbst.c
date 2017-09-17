@@ -9,11 +9,11 @@ void Vbst_IVmap_delete( IVmap * ivmap );
 
 static const IVmap_ops mapOps =
 {
-    .insert = Vbst_insert,
-    .assign = Vbst_insert,
-    .find   = Vbst_find,
-    .remove = Vbst_remove,
-    .delete = Vbst_IVmap_delete
+    .insert = (int (*)( void *, void *, void *)) Vbst_insert,
+    .assign = (int (*)( void *, void *, void *)) Vbst_insert,
+    .find   = (int (*)( void *, void *, void **)) Vbst_find,
+    .remove = (int (*)( void *, void *, void **))Vbst_remove,
+    .delete = (void (*)( void *))Vbst_IVmap_delete
 };
 
 IVmap * Vbst_IVmap_new( int (* comp)(void *, void *) )
@@ -210,4 +210,5 @@ int Vbst_find( Vbst * thiz, void * key, void ** pVal )
 int Vbst_remove( Vbst * thiz, void * key, void ** pVal )
 {
     // TODO: implement
+    return 0;
 }

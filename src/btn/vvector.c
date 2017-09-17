@@ -172,7 +172,7 @@ void VVector_remove(VVector* thiz, void * thing)
 
 const void * const * VVector_toArray(VVector* thiz)
 {
-    return thiz->array;
+    return (const void * const *)thiz->array;
 }
 
 void** VVector_toArray_cpy(VVector* thiz)

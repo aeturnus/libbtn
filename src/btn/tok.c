@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <btn/str/tok.h>
@@ -37,7 +38,7 @@ static void strtok_wrapper( const char * str, int * pNum, char *** pArray, void 
         tok = strtok( NULL, del );         //next token
     }
     *pNum = VVector_length( vec );
-    *pArray = VVector_toArray_cpy( vec );
+    *pArray = (char **)VVector_toArray_cpy( vec );
 
     free( buffer );
     VVector_delete( vec );
@@ -53,7 +54,7 @@ static void Tokenizer_ctor( Tokenizer *thiz, const char *str, const char *del)
 {
     // uses strtok as a base: TODO: implement own strtok
     // that uses a context so it's re-entrant
-    Tokenizer_ctor_custom( thiz, str, strtok_wrapper, del );
+    Tokenizer_ctor_custom( thiz, str, strtok_wrapper, (void *)del );
 }
 
 /**
@@ -116,7 +117,7 @@ const char* Tokenizer_next(Tokenizer* thiz)
     {
         return NULL;
     }
-    char* output = thiz->elements[thiz->pos];
+    const char* output = thiz->elements[thiz->pos];
     thiz->pos++;
     return output;
 }
@@ -125,7 +126,7 @@ char* Tokenizer_next_cpy(Tokenizer* thiz)
 {
     if( thiz == NULL )
         return NULL;
-    char *next = Tokenizer_next(thiz);
+    const char *next = Tokenizer_next(thiz);
     return (next==NULL)? NULL : strdup(next);
 }
 
@@ -137,13 +138,13 @@ const char* Tokenizer_peek(Tokenizer* tokenizer)
     {
         return 0x0;
     }
-    char* output = tokenizer->elements[tokenizer->pos];
+    const char* output = tokenizer->elements[tokenizer->pos];
     return output;
 }
 
 char* Tokenizer_peek_cpy(Tokenizer* thiz)
 {
-    char *peek = Tokenizer_peek(thiz);
+    const char *peek = Tokenizer_peek(thiz);
     return (peek==NULL)? NULL : strdup(peek);
 }
 
@@ -192,7 +193,7 @@ int Tokenizer_contains(Tokenizer* thiz, const char* str)
 
 const char * const * Tokenizer_tokens(Tokenizer *thiz)
 {
-    return thiz->elements;
+    return (const char * const *) thiz->elements;
 }
 
 // Returns a deep copy of all the tokens in an array

@@ -1,10 +1,12 @@
+#include <stdlib.h>
+
 #include <btn/ds/vector.h>
 
 #define MIN_SIZE 2
 
 static inline void * vector_index( vector * thiz, size_t index )
 {
-    return thiz->_buffer[index * thiz->_element_size];
+    return &thiz->_buffer[index * thiz->_element_size];
 }
 
 void vector_ctor( vector * thiz, size_t element_size, void (* clean)(void *) )
@@ -102,7 +104,7 @@ int vector_pop( vector * thiz, void * dst )
 
 int vector_get( vector * thiz, int index, void * dst )
 {
-    if (index >= thiz->_length)
+    if (index >= (int) thiz->_length)
         return 0;
 
     memcpy( dst, vector_index( thiz, thiz->_length ), thiz->_element_size );
