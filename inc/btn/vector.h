@@ -8,6 +8,8 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <btn/container.h>
+
 /**
  * The vector struct provides a similar API to the C++ STL vector
  */
@@ -29,7 +31,12 @@ typedef struct _vector
 /**
  * Construct the vector.
  * @param[in]   element_size    Size of elements to store
- * @param[in]   clean           Destructor function to use if not NULL
+ * @param[in]   ctor            Constructor function to use if not NULL
+ * @param[in]   dtor            Destructor function to use if not NULL
+ *                              In the case of a pointer type being stored in
+ *                              the vector, if you wish to have dtor destruct
+ *                              and free the pointer, you will need to provide
+ *                              a shim that provides both that functionality.
  */
 void vector_ctor(vector * vec, size_t element_size,
                  void (* ctor)(void *), void (* dtor)(void *));
@@ -157,6 +164,12 @@ bool vector_insert(vector * vec, size_t idx, const void * val);
  * @return true on success, false on failure
  */
 bool vector_erase(vector * vec, size_t idx);
+
+/**
+ * Returns a copy of the array
+ * @return Direct copy of the array
+ */
+void * vector_to_array(vector * vec);
 
 #ifdef __cplusplus
 }

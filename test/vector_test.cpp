@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <btn/vector.h>
+#include <btn/cstr.h>
 
 int ctor_count = 0;
 int dtor_count = 0;
@@ -118,4 +119,63 @@ TEST(vector, erase)
         else
             ASSERT_EQ(i+1, val) << "at index " << i;
     }
+}
+
+TEST(vector, to_array)
+{
+    vector(int) v;
+
+    count_reset();
+    vector_ctor(&v, sizeof(int), ctor_up, dtor_up);
+
+    for (int i = 0; i < 10; ++i) {
+        vector_push_back(&v, &i);
+    }
+    for (int i = 0; i < 10; ++i) {
+        int val;
+        vector_get(&v, i, &val);
+    }
+    int * arr = (int *) vector_to_array(&v);
+
+    vector_dtor(&v);
+
+    for (int i = 0; i < 10; ++i) {
+        ASSERT_EQ(i, arr[i]);
+    }
+}
+
+int free_count = 0;
+void string_free(char ** str_ptr)
+{
+    ++free_count;
+    char * str = * str_ptr;
+    free(str);
+}
+#define ARRAY_LEN(x) (sizeof(x)/sizeof(x[0]))
+TEST(vector, pointer_types)
+{
+    const char * strings[] = {
+        "Hello world!",
+        "How do you do!",
+        "Za warudo",
+        "aaaabbbbccc",
+        "ddeeefff",
+        "ggghhiiijjkkll"
+    };
+
+    vector(char *) v;
+    vector_ctor(&v, sizeof(char *), NULL, dtor_cast(string_free));
+    int len = ARRAY_LEN(strings);
+    for (int i = 0; i < len; ++i) {
+        char * str = strdup(strings[i]);
+        vector_push_back(&v, &str);
+    }
+    ASSERT_EQ(len, vector_size(&v));
+    for (int i = 0; i < len; ++i) {
+        char * str;
+        vector_get(&v, i, &str);
+        ASSERT_STREQ(strings[i], str);
+    }
+    vector_dtor(&v);
+    ASSERT_EQ(len, free_count);
 }

@@ -240,3 +240,11 @@ bool vector_erase(vector * vec, size_t idx)
 
     return true;
 }
+
+void * vector_to_array(vector * vec)
+{
+    size_t n = vec->e_size * vec->size;
+    void * out = malloc(n);
+    memcpy(out, vec->data, n);
+    return out;
+}
