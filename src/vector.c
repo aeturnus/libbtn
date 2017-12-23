@@ -233,9 +233,10 @@ bool vector_erase(vector * vec, size_t idx)
 
     // shift over
     size_t new_size = vec->size - 1;
-    for (size_t i = idx; i < new_size - 1; ++i) {
+    for (size_t i = idx; i < new_size; ++i) {
         memcpy(element(vec, i), element(vec, i+1), vec->e_size);
     }
+    vec->size = new_size;
 
     return true;
 }
