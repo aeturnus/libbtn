@@ -1,2 +1,4 @@
 # libbtn
-Bunch of cool stuff I can use if I have no access to any other libraries
+
+My personal library of data structures and helpful code to use in classes and projects
+that use C and/or C++ when there isn't access to STl.

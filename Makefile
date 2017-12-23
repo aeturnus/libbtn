@@ -1,20 +1,57 @@
 PROOT = $(shell pwd)
-export BINDIR = $(PROOT)/bin
-export OBJDIR = $(PROOT)/obj
-export LIBDIR = $(PROOT)/lib
+BINDIR = $(PROOT)/bin
+OBJDIR = $(PROOT)/obj
+LIBDIR = $(PROOT)/lib
+SRCDIR = $(PROOT)/src
 
-export CC = gcc
-export LD = ld
-export CFLAGS =-Wall -Wextra -Wno-unused-parameter -g
-export INCLUDE = -I$(PROOT)/inc
-export LIBS   = -L$(LIBDIR) -lbtn
+MODULE = btn
 
-export CFLAGS +=-DDEBUG
+CC = gcc
+LD = ld
+CFLAGS =-Wall -Wextra -Wno-unused-parameter -g
+INCLUDE = -I$(PROOT)/inc
+LIBS   = -L$(LIBDIR) -lbtn
 
-BASE = src
+CFLAGS +=-DDEBUG
 
-all:
-	+$(MAKE) -C $(BASE)/btn
+SOURCES += $(shell find $(SRCDIR) -name '*.c')
+SOURCES += $(shell find $(SRCDIR) -name '*.cpp')
+BIN = lib$(MODULE).a
+
+OBJECTS = $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/$(MODULE)/%.o)
+
+# unit testing stuff
+GTEST_DIR = test
+GTEST_BIN = test_$(MODULE)
+GTEST_SRC = $(GTEST_DIR)/*.cpp
+####
+
+$(OBJDIR)/$(MODULE)/%.o:$(SRCDIR)/%.cpp
+	mkdir -p $(@D)	# generate the directory
+	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $(@)
+
+$(OBJDIR)/$(MODULE)/%.o:$(SRCDIR)/%.c
+	mkdir -p $(@D)	# generate the directory
+	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $(@)
+
+$(LIBDIR)/$(BIN): $(OBJECTS)
+	mkdir -p $(LIBDIR)
+	ar rcs $(LIBDIR)/$(BIN) $(OBJECTS)
+	echo $(SRCDIR)
+	@echo "Library built"
+
+$(BINDIR)/$(GTEST_BIN): $(OBJECTS)
+	mkdir -p $(BINDIR)
+	$(CC) $(CFLAGS) $(INCLUDE) -lgtest -o $(BINDIR)/$(GTEST_BIN) $(OBJECTS) $(GTEST_SRC) $(LIBS) 
+	@echo "gtest suite built"
+
+all: $(LIBDIR)/$(BIN)
+
+gtest: $(BINDIR)/$(GTEST_BIN)
+	@$(BINDIR)/$(GTEST_BIN)
+
+test: $(BINDIR)/$(GTEST_BIN)
+	@$(BINDIR)/$(GTEST_BIN)
 
 clean:
 	#rm -rf cscope
