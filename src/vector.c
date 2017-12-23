@@ -1,154 +1,241 @@
 #include <stdlib.h>
+#include <string.h>
 
-#include <btn/ds/vector.h>
+#include <btn/vector.h>
 
-#define MIN_SIZE 2
+#define MIN_CAP 4
 
-static inline void * vector_index( vector * thiz, size_t index )
+// Get the pointer to the element
+static inline
+void * element(vector * vec, int idx)
 {
-    return &thiz->_buffer[index * thiz->_element_size];
+    void * out = vec->data + idx * vec->e_size;
+    return out;
 }
 
-void vector_ctor( vector * thiz, size_t element_size, void (* clean)(void *) )
+void vector_ctor_size_cap(vector * vec, size_t element_size,
+                          size_t initial_size, size_t initial_cap,
+                          void (* ctor)(void *), void (* dtor)(void *))
 {
-    vector_ctor_cap( thiz, element_size, MIN_SIZE, clean );
-}
-
-void vector_ctor_cap( vector * thiz, size_t element_size, size_t initial_capacity, void (* clean)(void *) )
-{
-    if (initial_capacity < MIN_SIZE)
-        initial_capacity = MIN_SIZE;
-
-    thiz->_buffer = (char *)malloc( element_size * initial_capacity);
-    thiz->_element_size = element_size;
-    thiz->_length = 0;
-    thiz->_capacity = initial_capacity;
-    thiz->_clean = clean;
-}
-
-void vector_dtor( vector * thiz )
-{
-    // if we have a cleanup function for each element
-    if (thiz->_clean)
-    {
-        for (int i = thiz->_length - 1; i >= 0; --i)
-        {
-            thiz->_clean( vector_index( thiz, i ) );
+    vec->e_size = element_size;
+    vec->size   = initial_size;
+    if (initial_cap < MIN_CAP)
+        initial_cap = MIN_CAP;
+    if (initial_cap < initial_size)
+        initial_cap = initial_size;
+    vec->cap    = initial_cap;
+    vec->ctor   = ctor;
+    vec->dtor   = dtor;
+    vec->data   = (uint8_t *) malloc(vec->e_size * vec->cap);
+    if (vec->ctor != NULL) {
+        for (size_t i = 0; i < initial_size; ++i) {
+            vec->ctor(element(vec, i));
         }
     }
-
-    free( thiz->_buffer );
 }
 
-vector * vector_new( size_t element_size, void (* clean)(void *) )
+
+void vector_ctor_size(vector * vec, size_t element_size, size_t initial_size,
+                      void (* ctor)(void *), void (* dtor)(void *))
 {
-    return vector_new_cap( element_size, MIN_SIZE, clean );
+    vector_ctor_size_cap(vec, element_size, initial_size,
+                         initial_size * 2, ctor, dtor);
 }
 
-vector * vector_new_cap( size_t element_size, size_t initial_capacity, void (* clean)(void *) )
+void vector_ctor(vector * vec, size_t element_size,
+                 void (* ctor)(void *), void (* dtor)(void *))
 {
-    vector * thiz = (vector *)malloc( sizeof(vector) );
-    vector_ctor_cap( thiz, element_size, initial_capacity, clean );
-    return thiz;
+    vector_ctor_size_cap(vec, element_size, 0, 0, ctor, dtor);
 }
 
-void vector_delete( vector * thiz )
+void vector_dtor(vector * vec)
 {
-    vector_dtor( thiz );
-    free( thiz );
+    if (vec->dtor != NULL) {
+        for (int i = vec->size - 1; i >= 0; --i) {
+            vec->dtor(element(vec, i));
+        }
+    }
+    free(vec->data);
+    vec->data = NULL;
 }
 
-int vector_realloc( vector * thiz, size_t capacity )
+static inline
+size_t grow(size_t cap)
 {
-    if (capacity <= thiz->_capacity)
-        return 1;
-
-    char * new_buffer = (char *)realloc( thiz->_buffer, thiz->_element_size * capacity );
-
-    if (!new_buffer)
-        return 0;
-
-    thiz->_capacity = capacity;
-    thiz->_buffer = new_buffer;
-    return 1;
+    return cap * 3 / 2;
 }
 
-static inline int vector_amortize( vector * thiz )
+bool vector_resize(vector * vec, size_t new_size)
 {
-    // amortize 3/2'ing
-    return vector_realloc( thiz, (thiz->_capacity * 3) / 2 );
+    size_t old_size = vec->size;
+    if (new_size < old_size) {
+        // size it down: destruct elements
+        if (vec->dtor != NULL) {
+            for (size_t i = new_size; i < old_size; ++i) {
+                vec->dtor(element(vec, i));
+            }
+        }
+    } else if (new_size > old_size) {
+        // if no more capacity, reserve more space
+        if (new_size > vec->cap) {
+            if (!vector_reserve(vec, grow(vec->cap)))
+                return false;
+        }
+        // size up: construct elements
+        if (vec->ctor != NULL) {
+            for (size_t i = old_size; i < new_size; ++i) {
+                vec->ctor(element(vec, i));
+            }
+        }
+    }
+    vec->size = new_size;
+    return true;
 }
 
-int vector_push( vector * thiz, const void * src )
+bool vector_reserve(vector * vec, size_t new_cap)
 {
-    if (thiz->_length == thiz->_capacity)
-    {
-        if (!vector_amortize( thiz ))
-            return 0;
+    if (new_cap <= vec->cap)
+        return true;
+
+    uint8_t * new_data = (uint8_t *) realloc(vec->data, vec->e_size * new_cap);
+    if (new_data == NULL)
+        return false;
+    vec->data = new_data;
+    vec->cap = new_cap;
+
+    return true;
+}
+
+bool vector_push_back(vector * vec, const void * val)
+{
+    // sizing
+    size_t new_size = vec->size + 1;
+    if (new_size > vec->cap) {
+        if (!vector_reserve(vec, grow(vec->cap)))
+            return false;
     }
 
-    memcpy( vector_index( thiz, thiz->_length ), src, thiz->_element_size );
-    thiz->_length += 1;
-    return 1;
+    // copy over val
+    memcpy(element(vec, new_size - 1), val, vec->e_size);
+    vec->size = new_size;
+
+    return true;
 }
 
-int vector_pop( vector * thiz, void * dst )
+bool vector_pop_back(vector * vec)
 {
-    if (thiz->_length == 0)
-        return 0;
-    memcpy( dst, vector_index( thiz, thiz->_length ), thiz->_element_size );
-    thiz->_length -= 1;
+    if (vec->size == 0)
+        return false;
 
-    return 1;
+    if (vec->dtor) {
+        vec->dtor(element(vec, vec->size - 1));
+    }
+    vec->size -= 1;
+
+    return true;
 }
 
-int vector_get( vector * thiz, int index, void * dst )
+bool vector_front(vector * vec, void * val)
 {
-    if (index >= (int) thiz->_length)
-        return 0;
+    void * src = vector_frontp(vec);
+    if (src == NULL)
+        return false;
 
-    memcpy( dst, vector_index( thiz, thiz->_length ), thiz->_element_size );
+    memcpy(val, src, vec->e_size);
 
-    return 1;
+    return true;
 }
 
-static inline void vector_move( vector * thiz, size_t dst, size_t src )
+bool vector_back(vector * vec, void * val)
 {
-    memcpy( vector_index( thiz, dst ), vector_index( thiz, src ), thiz->_element_size );
+    void * src = vector_backp(vec);
+    if (src == NULL)
+        return false;
+
+    memcpy(val, src, vec->e_size);
+
+    return true;
 }
 
-int vector_insert( vector * thiz, int index, const void * src )
+bool vector_get(vector * vec, size_t idx, void * val)
 {
-    if (thiz->_length == thiz->_capacity)
-    {
-        if (!vector_amortize( thiz ))
-            return 0;
+    void * src = vector_getp(vec, idx);
+    if (src == NULL)
+        return false;
+
+    memcpy(val, src, vec->e_size);
+
+    return true;
+}
+
+bool vector_put(vector * vec, size_t idx, const void * val)
+{
+    void * dst = vector_getp(vec, idx);
+    if (dst == NULL)
+        return false;
+    memcpy(dst, val, vec->e_size);
+
+    return true;
+}
+
+void * vector_frontp(vector * vec)
+{
+    if (vec->size == 0)
+        return NULL;
+    return element(vec, 0);
+}
+
+void * vector_backp(vector * vec)
+{
+    if (vec->size == 0)
+        return NULL;
+    return element(vec, vec->size - 1);
+}
+
+void * vector_getp(vector * vec, size_t idx)
+{
+    if (vec->size == 0 || idx >= vec->size)
+        return NULL;
+
+    return element(vec, idx);
+}
+
+bool vector_insert(vector * vec, size_t idx, const void * val)
+{
+    if (vec->size == 0 || idx >= vec->size)
+        return false;
+
+    // sizing
+    size_t new_size = vec->size + 1;
+    if (new_size > vec->cap) {
+        if (!vector_reserve(vec, grow(vec->cap)))
+            return false;
     }
 
-    // shift elements to right
-    for (int i = thiz->_length-1; i > index; --i)
-    {
-        vector_move( thiz, i, i-1 );
+    // shift over
+    for (size_t i = new_size - 1; i > idx; --i) {
+        memcpy(element(vec, i), element(vec, i - 1), vec->e_size);
     }
+    memcpy(element(vec, idx), val, vec->e_size);
+    vec->size = new_size;
 
-    // insert the element
-    memcpy( vector_index( thiz, index ), src, thiz->_element_size );
-
-    return 1;
+    return true;
 }
 
-int vector_remove( vector * thiz, int index, void * dst )
+bool vector_erase(vector * vec, size_t idx)
 {
-    if (thiz->_length == 0)
-        return 0;
+    if (vec->size == 0 || idx >= vec->size)
+        return false;
 
-    // shift elements to left
-    int length = thiz->_length;
-    for (int i = index; i < length-1; ++i)
-    {
-        vector_move( thiz, i, i+1 );
+    if (vec->dtor != NULL) {
+        vec->dtor(element(vec, idx));
     }
-    thiz->_length -= 1;
 
-    return 1;
+    // shift over
+    size_t new_size = vec->size - 1;
+    for (size_t i = idx; i < new_size - 1; ++i) {
+        memcpy(element(vec, i), element(vec, i+1), vec->e_size);
+    }
+
+    return true;
 }
