@@ -7,8 +7,10 @@ SRCDIR = $(PROOT)/src
 MODULE = btn
 
 CC = gcc
+CXX = g++
 LD = ld
-CFLAGS =-Wall -Wextra -Wno-unused-parameter -g
+CFLAGS =-Wall -Wextra -Wno-unused-parameter --std=c99 -g
+CXXFLAGS =-Wall -Wextra -Wno-unused-parameter --std=c++11 -g
 INCLUDE = -I$(PROOT)/inc
 LIBS   = -L$(LIBDIR) -lbtn
 
@@ -40,9 +42,9 @@ $(LIBDIR)/$(BIN): $(OBJECTS)
 	echo $(SRCDIR)
 	@echo "Library built"
 
-$(BINDIR)/$(GTEST_BIN): $(OBJECTS)
+$(BINDIR)/$(GTEST_BIN): $(GTEST_SRC) $(OBJECTS)
 	mkdir -p $(BINDIR)
-	$(CC) $(CFLAGS) $(INCLUDE) -lgtest -o $(BINDIR)/$(GTEST_BIN) $(OBJECTS) $(GTEST_SRC) $(LIBS) 
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -o $(BINDIR)/$(GTEST_BIN) $(OBJECTS) $(GTEST_SRC) $(LIBS) -lgtest 
 	@echo "gtest suite built"
 
 all: $(LIBDIR)/$(BIN)
