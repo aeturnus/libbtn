@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <btn/bst.h>
+#include <btn/map.h>
 #include <btn/container.h>
 #include <btn/cstr.h>
 
@@ -31,4 +32,75 @@ TEST(bst_node, access)
     ASSERT_STREQ(expect_string, key);
     ASSERT_EQ(expect_val, val);
     bst_node_delete(&tree, node);
+
+    bst_dtor(&tree);
+}
+
+typedef struct _str_int
+{
+    const char * key;
+    int val;
+} str_int;
+
+#define ARRAY_LEN(x) (sizeof(x)/sizeof(x[0]))
+TEST(bst, insert_find)
+{
+    bst(char *, int) tree;
+    bst_ctor(&tree, sizeof(char *), sizeof(int),
+             NULL, NULL, strcmp_shim);
+
+    static const str_int pairs[] = {
+        {"John Doe", 25},
+        {"Jane Doe", 82},
+        {"Austin Smith", 33},
+        {"Hannah Reed", 94},
+        {"Victor Bovik", 32},
+    };
+
+    int len = ARRAY_LEN(pairs);
+    for (int i = 0; i < len; ++i) {
+        bst_insert(&tree, &pairs[i].key, &pairs[i].val);
+    }
+
+    ASSERT_EQ(len, bst_size(&tree));
+
+
+    for (int i = 0; i < len; ++i) {
+        int    val;
+        ASSERT_TRUE(bst_find(&tree, &pairs[i].key, &val));
+        ASSERT_EQ(pairs[i].val, val);
+    }
+
+    bst_dtor(&tree);
+}
+
+TEST(bst_map, insert_find)
+{
+    bst(char *, int) tree;
+    bst_ctor(&tree, sizeof(char *), sizeof(int),
+             NULL, NULL, strcmp_shim);
+
+    static const str_int pairs[] = {
+        {"John Doe", 25},
+        {"Jane Doe", 82},
+        {"Austin Smith", 33},
+        {"Hannah Reed", 94},
+        {"Victor Bovik", 32},
+    };
+
+    int len = ARRAY_LEN(pairs);
+    for (int i = 0; i < len; ++i) {
+        map_insert(&tree, &pairs[i].key, &pairs[i].val);
+    }
+
+    ASSERT_EQ(len, map_size(&tree));
+
+
+    for (int i = 0; i < len; ++i) {
+        int    val;
+        ASSERT_TRUE(map_find(&tree, &pairs[i].key, &val));
+        ASSERT_EQ(pairs[i].val, val);
+    }
+
+    bst_dtor(&tree);
 }

@@ -4,8 +4,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include <btn/map.h>
 
 #define bst(key_type, val_type) bst
+
+typedef struct _bst_ops
+{
+    map_ops map;
+} bst_ops;
 
 struct _bst_node;
 typedef struct _bst_node bst_node;
@@ -23,10 +29,13 @@ typedef struct _bst
     void (* val_dtor)(void *);  // value destructor function
 
     int (* key_cmp)(const void * k1, const void * k2);  // key comparator
+
+    // vtable
+    bst_ops * ops;
 } bst;
 
 /**
- * Constructs a red-black tree
+ * Constructs a binary search tree
  * @param[in]   key_size    How large (bytes) is the key type (use sizeof())
  * @param[in]   val_size    How large (bytes) is the value type (use sizeof())
  * @param[in]   key_dtor    Destructor function for the key
@@ -35,9 +44,11 @@ typedef struct _bst
  *                          Returns <0 if k1 < k2, 0 if k1 == k2, >0 if k1 > k2
  */
 void bst_ctor(bst * tree,
-                  size_t key_size, size_t val_size,
-                  void (* key_dtor)(void *), void (* val_dtor)(void *),
-                  int (* key_cmp)(const void * k1, const void * k2));
+              size_t key_size, size_t val_size,
+              void (* key_dtor)(void *), void (* val_dtor)(void *),
+              int (* key_cmp)(const void * k1, const void * k2));
+
+void bst_dtor(bst * tree);
 
 /**
  * Inserts a key-value pair into the tree
@@ -59,14 +70,14 @@ bool bst_erase(bst * tree, const void * key);
  * @param[in]   key     Pointer to key
  * @param[in]   val     Pointer to write value to
  */
-bool bst_get(bst * tree, const void * key, void * val);
+bool bst_find(bst * tree, const void * key, void * val);
 
 /**
  * Retrieves value for given key
  * @param[in]   key     Pointer to key
  * @return  Pointer to the value
  */
-void * bst_getp(bst * tree, const void * key);
+void * bst_findp(bst * tree, const void * key);
 
 static inline
 size_t bst_size(bst * tree) { return tree->size; }

@@ -5,6 +5,18 @@
 
 #include <btn/bst.h>
 
+static bst_ops ops = {
+    .map = {
+        .insert = (bool (*)(void *, const void *, const void *)) bst_insert,
+        .find   = (bool (*)(void *, const void *, void *)) bst_find,
+        .findp  = (void * (*)(void *, const void *)) bst_findp,
+        .erase  = (bool (*)(void *, const void *)) bst_erase,
+        .size   = (size_t (*)(void *)) bst_size,
+        .empty  = (bool (*)(void *)) bst_erase
+    }
+};
+
+
 struct _bst_node
 {
     rb_color  c;
@@ -17,11 +29,12 @@ struct _bst_node
 
 static inline void * keyp(bst * tree, bst_node * node);
 static inline void * valp(bst * tree, bst_node * node);
+static void bst_node_tree_delete(bst * tree, bst_node * root);
 
 void bst_ctor(bst * tree,
-                  size_t key_size, size_t val_size,
-                  void (* key_dtor)(void *), void (* val_dtor)(void *),
-                  int (* key_cmp)(const void * k1, const void * k2))
+              size_t key_size, size_t val_size,
+              void (* key_dtor)(void *), void (* val_dtor)(void *),
+              int (* key_cmp)(const void * k1, const void * k2))
 {
     tree->root = NULL;
     tree->size = 0;
@@ -30,32 +43,70 @@ void bst_ctor(bst * tree,
     tree->key_dtor = key_dtor;
     tree->val_dtor = val_dtor;
     tree->key_cmp  = key_cmp;
+    tree->ops      = &ops;
+}
+
+void bst_dtor(bst * tree)
+{
+    bst_node_tree_delete(tree, tree->root);
 }
 
 bool bst_insert(bst * tree, const void * key, const void * val)
 {
-    void * find = bst_getp(tree, key);
-    if (find != NULL)
-        return false;
-
-    bst_node * node = bst_node_new(tree, key, val);
 
     // insertion logic
+    bst_node * prev = NULL;
+    bst_node * curr = tree->root;
+
+    // Case: empty
+    if (curr == NULL) {
+        bst_node * node = bst_node_new(tree, key, val);
+        tree->root = node;
+        ++tree->size;
+        return true;
+    }
+
+    // replication of search logic
+    int cmp = 0;
+    while (curr != NULL) {
+        prev = curr;
+        void * node_key = keyp(tree, curr);
+        cmp = tree->key_cmp(key, node_key);
+        if (cmp == 0) {
+            return false;
+        } else if (cmp < 0) {
+            curr = curr->l;
+        } else {
+            curr = curr->r;
+        }
+    }
+
+    // when it gets here, curr is NULL, prev is the parent
+    bst_node * node = bst_node_new(tree, key, val);
+    if (cmp < 0) {
+        node->p = prev;
+        prev->l = node;
+    } else {
+        node->p = prev;
+        prev->r = node;
+    }
+    ++tree->size;
 
     return true;
 }
 
 bool bst_erase(bst * tree, const void * key)
 {
+    return false;
 }
 
-bool bst_get(bst * tree, const void * key, void * val)
+bool bst_find(bst * tree, const void * key, void * val)
 {
-    void * src = bst_getp(tree, key);
+    void * src = bst_findp(tree, key);
     memcpy(val, src, tree->val_size);
 }
 
-void * bst_getp(bst * tree, const void * key)
+void * bst_findp(bst * tree, const void * key)
 {
     bst_node * curr = tree->root;
     while (curr != NULL) {
@@ -148,4 +199,15 @@ void bst_node_delete(bst * tree, bst_node * node)
     if (tree->val_dtor != NULL)
         tree->val_dtor(valp(tree, node));
     free(node);
+}
+
+static
+void bst_node_tree_delete(bst * tree, bst_node * root)
+{
+    if (root == NULL)
+        return;
+    bst_node_tree_delete(tree, root->l);
+    bst_node_delete(tree, root->l);
+    bst_node_tree_delete(tree, root->r);
+    bst_node_delete(tree, root->r);
 }
