@@ -69,7 +69,7 @@ void internal_tokenizer(const char * str, size_t * size_p,
         }
     }
 
-    *elems_p = vector_to_array(&v);
+    *elems_p = (char **) vector_to_array(&v);
     *size_p  = vector_size(&v);
     vector_dtor(&v);
 }

@@ -20,7 +20,9 @@ extern "C" {
  */
 char * stridup(const char * str, size_t start, size_t end);
 
+#ifndef __cplusplus
 char * strdup(const char * str);
+#endif
 
 /**
  * Creates a string given a single character
