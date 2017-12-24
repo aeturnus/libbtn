@@ -19,7 +19,7 @@ extern "C" {
  * element itself. This function will dereference that element pointer and
  * pass that dereferenced data pointer to free.
  */
-void container_free_shim(void * arg);
+void btn_free_shim(void * arg);
 
 /**
  * This macros are for casting constructors and destructors to

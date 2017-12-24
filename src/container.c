@@ -2,7 +2,7 @@
 
 #include <btn/container.h>
 
-void container_free_shim(void * arg)
+void btn_free_shim(void * arg)
 {
     void * ptr = *(void **)arg;
     free(ptr);
