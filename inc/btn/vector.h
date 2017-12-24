@@ -9,6 +9,7 @@ extern "C" {
 #include <stdbool.h>
 
 #include <btn/container.h>
+#include <btn/iterator.h>
 
 /**
  * The vector struct provides a similar API to the C++ STL vector
@@ -16,6 +17,11 @@ extern "C" {
 
 // So you can specify the type
 #define vector(type) vector
+
+typedef struct _vector_ops
+{
+    iterable_ops iterable;
+} vector_ops;
 
 typedef struct _vector
 {
@@ -26,7 +32,24 @@ typedef struct _vector
     size_t    cap;          // actual size of buffer in elements
     void (* ctor)(void *);  // element default constructor function
     void (* dtor)(void *);  // element destructor function
+
+    // vtable
+    vector_ops * ops;
 } vector;
+
+typedef struct _vector_it_ops
+{
+    iterator_ops iterator;
+} vector_it_ops;
+
+typedef struct _vector_it
+{
+    vector * vec;   // reference to its vector
+    size_t pos;     // position in the vector
+
+    // vtable
+    vector_it_ops * ops;
+} vector_it;
 
 /**
  * Construct the vector.

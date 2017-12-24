@@ -179,3 +179,116 @@ TEST(vector, pointer_types)
     vector_dtor(&v);
     ASSERT_EQ(len, free_count);
 }
+
+TEST(vector, iterator_forward_traverse)
+{
+    vector(int) v;
+
+    vector_ctor(&v, sizeof(int), ctor_up, dtor_up);
+    for (int i = 0; i < 10; ++i) {
+        vector_push_back(&v, &i);
+    }
+
+    vector_it it;
+    it_begin(&v, &it);
+    int i = 0;
+    while (!it_is_end(&it)) {
+        int val;
+        int * ptr;
+        it_read(&it, &val);
+        ptr = (int *) it_ptr(&it);
+        ASSERT_EQ(i, val);
+        ASSERT_EQ(i, *ptr);
+        it_next(&it, 1);
+        ++i;
+    }
+
+    vector_dtor(&v);
+}
+
+TEST(vector, iterator_backward_traverse)
+{
+    vector(int) v;
+
+    vector_ctor(&v, sizeof(int), ctor_up, dtor_up);
+    for (int i = 0; i < 10; ++i) {
+        vector_push_back(&v, &i);
+    }
+
+    vector_it it;
+    it_end(&v, &it);
+    int i = 10;
+    do {
+        --i;
+        it_prev(&it, 1);
+        int val;
+        int * ptr;
+        it_read(&it, &val);
+        ptr = (int *) it_ptr(&it);
+        ASSERT_EQ(i, val);
+        ASSERT_EQ(i, *ptr);
+    } while (!it_is_begin(&it));
+
+    vector_dtor(&v);
+}
+
+TEST(vector, iterator_remove)
+{
+    vector(int) v;
+
+    vector_ctor(&v, sizeof(int), ctor_up, dtor_up);
+    for (int i = 0; i < 10; ++i) {
+        vector_push_back(&v, &i);
+    }
+
+    vector_it it;
+    it_begin(&v, &it);
+    it_next(&it, 5);
+    it_remove(&it);
+    it_prev(&it, 5);
+
+    ASSERT_EQ(9, vector_size(&v));
+    for (int i = 0; i < 9; ++i) {
+        int val;
+        it_read(&it, &val);
+        if (i < 5)
+            ASSERT_EQ(i, val);
+        else
+            ASSERT_EQ(i+1, val);
+        it_next(&it, 1);
+    }
+
+    vector_dtor(&v);
+}
+
+TEST(vector, iterator_insert)
+{
+    vector(int) v;
+
+    vector_ctor(&v, sizeof(int), ctor_up, dtor_up);
+    for (int i = 0; i < 10; ++i) {
+        vector_push_back(&v, &i);
+    }
+
+    vector_it it;
+    it_begin(&v, &it);
+    it_next(&it, 5);
+    int insert = 23;
+    it_insert(&it, &insert);
+    it_prev(&it, 5);
+
+    ASSERT_EQ(11, vector_size(&v));
+    for (int i = 0; i < 11; ++i) {
+        int val;
+        it_read(&it, &val);
+        if (i < 5)
+            ASSERT_EQ(i, val);
+        else if (i == 5)
+            ASSERT_EQ(insert, val);
+        else
+            ASSERT_EQ(i-1, val);
+        it_next(&it, 1);
+    }
+
+    vector_dtor(&v);
+}

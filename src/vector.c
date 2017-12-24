@@ -2,8 +2,43 @@
 #include <string.h>
 
 #include <btn/vector.h>
+#include <btn/etc.h>
 
 #define MIN_CAP 4
+
+static void vector_begin(vector * vec, vector_it * it);
+static void vector_end(vector * vec, vector_it * it);
+static void vector_it_next(vector_it * it, int n);
+static void vector_it_prev(vector_it * it, int n);
+static bool vector_it_insert(vector_it * it, const void * val);
+static bool vector_it_remove(vector_it * it);
+static bool vector_it_read(vector_it * it, void * dst);
+static void * vector_it_ptr(vector_it * it);
+static bool vector_it_is_begin(vector_it * it);
+static bool vector_it_is_end(vector_it * it);
+
+static
+vector_ops vector_operations = {
+    .iterable = {
+        .begin = (void (*)(void *, void*)) vector_begin,
+        .end   = (void (*)(void *, void*)) vector_end
+    }
+};
+
+static
+vector_it_ops vector_it_operations = {
+    .iterator = {
+        .next   = (void (*)(void *, int)) vector_it_next,
+        .prev   = (void (*)(void *, int)) vector_it_prev,
+        .insert = (bool (*)(void *, const void *)) vector_it_insert,
+        .remove = (bool (*)(void *)) vector_it_remove,
+        .read   = (bool (*)(void *, void *)) vector_it_read,
+        .ptr    = (void * (*)(void *)) vector_it_ptr,
+        .is_begin   = (bool (*)(void *)) vector_it_is_begin,
+        .is_end     = (bool (*)(void *)) vector_it_is_end
+    }
+};
+
 
 // Get the pointer to the element
 static inline
@@ -32,6 +67,7 @@ void vector_ctor_size_cap(vector * vec, size_t element_size,
             vec->ctor(element(vec, i));
         }
     }
+    vec->ops    = &vector_operations;
 }
 
 
@@ -247,4 +283,69 @@ void * vector_to_array(vector * vec)
     void * out = malloc(n);
     memcpy(out, vec->data, n);
     return out;
+}
+
+// Iterator interface below
+
+static
+void vector_begin(vector * vec, vector_it * it)
+{
+    it->vec = vec;
+    it->pos = 0;
+    it->ops = &vector_it_operations;
+}
+static
+void vector_end(vector * vec, vector_it * it)
+{
+    it->vec = vec;
+    it->pos = vec->size;
+    it->ops = &vector_it_operations;
+}
+
+static
+void vector_it_next(vector_it * it, int n)
+{
+    it->pos = clamp(it->pos + n, 0, vector_size(it->vec));
+}
+
+static
+void vector_it_prev(vector_it * it, int n)
+{
+    it->pos = clamp(it->pos - n, 0, vector_size(it->vec));
+}
+
+static
+bool vector_it_insert(vector_it * it, const void * val)
+{
+    return vector_insert(it->vec, it->pos, val);
+}
+
+static
+bool vector_it_remove(vector_it * it)
+{
+    return vector_erase(it->vec, it->pos);
+}
+
+static
+bool vector_it_read(vector_it * it, void * dst)
+{
+    return vector_get(it->vec, it->pos, dst);
+}
+
+static
+void * vector_it_ptr(vector_it * it)
+{
+    return vector_getp(it->vec, it->pos);
+}
+
+static
+bool vector_it_is_begin(vector_it * it)
+{
+    return it->pos == 0;
+}
+
+static
+bool vector_it_is_end(vector_it * it)
+{
+    return it->pos == vector_size(it->vec);
 }
