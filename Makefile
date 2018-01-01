@@ -70,7 +70,7 @@ test: $(BINDIR)/$(GTEST_BIN)
 	@rm -f temp.txt
 
 clean:
-	#rm -rf cscope
+	@#rm -rf cscope
 	rm -rf $(BINDIR)
 	rm -rf $(OBJDIR)
 	rm -rf $(LIBDIR)
