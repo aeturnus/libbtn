@@ -60,3 +60,27 @@ int strcmp_caseless(const char * s1, const char * s2)
     }
     return c1-c2;
 }
+
+size_t strfind(const char * str, const char * substr, size_t off)
+{
+    int idx = off;
+    size_t str_len = strlen(str);
+    size_t substr_len = strlen(substr);
+    while (idx + substr_len <= str_len) {
+        if (strncmp(&str[idx], substr, substr_len) == 0)
+            return idx;
+        ++idx;
+    }
+    return SIZE_MAX;
+}
+
+size_t strcfind(const char * str, char c, size_t off)
+{
+    size_t idx = off;
+    while (str[idx] != '\0') {
+        if (c == str[idx])
+            return idx;
+        ++idx;
+    }
+    return SIZE_MAX;
+}

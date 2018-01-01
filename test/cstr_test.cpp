@@ -32,6 +32,23 @@ TEST(cstr, strcmp_caseless)
     ASSERT_TRUE(strcmp_caseless("Cat", "bAT") > 0);
 }
 
+TEST(cstr, strfind)
+{
+    const char * string = "The cat in the hat spoke back";
+    ASSERT_EQ(4, strfind(string, "cat", 0));
+    ASSERT_EQ(15, strfind(string, "hat", 0));
+    ASSERT_EQ(25, strfind(string, "back", 0));
+    ASSERT_EQ(SIZE_MAX, strfind(string, "dog", 0));
+}
+
+TEST(cstr, strcfind)
+{
+    const char * string = "abcdefghijklmnopqrstuvwxyz";
+    for (int i = 0; i < 26; ++i) {
+        ASSERT_EQ(i, strcfind(string, 'a' + i, 0));
+    }
+}
+
 TEST(cstr, to_upper)
 {
     ASSERT_EQ('A', to_upper('a'));

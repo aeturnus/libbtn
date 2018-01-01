@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 #include <string.h>
+#include <stdint.h>
 
 /**
  * Helpful functions involving C strings
@@ -36,6 +37,24 @@ char * char_to_str(char c);
  * @return <0 if s1 < s2, 0 if s1 == s2, >0 if s1 > s2 in lexographic ordering
  */
 int strcmp_caseless(const char * s1, const char * s2);
+
+/**
+ * Finds first occurance of substring
+ * @param   str     The string to search in
+ * @param   substr  The string to look for
+ * @param   off     Offset to start from
+ * @return  Index of pattern; SIZE_MAX if not found
+ */
+size_t strfind(const char * str, const char * substr, size_t off);
+
+/**
+ * Finds first occurance of character
+ * @param   str     The string to search in
+ * @param   c       The char to look for
+ * @param   off     Offset to start from
+ * @return  Index of pattern; SIZE_MAX if not found
+ */
+size_t strcfind(const char * str, char c, size_t off);
 
 /**
  * Turns uppercase character into lowercase

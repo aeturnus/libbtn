@@ -1,5 +1,5 @@
 #if defined PLATFORM_WINDOWS
-#define DEF_STRIP true
+#define DEF_STRIP true  // strip by default: command prompt can't handle colors
 #elif defined PLATFORM_UNIX
 #define _POSIX_C_SOURCE 1
 #include <unistd.h>
