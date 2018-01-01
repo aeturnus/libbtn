@@ -13,6 +13,9 @@ extern "C" {
 #define ANSI_UNDER      "\x1B[4m"
 #define ANSI_BLINK      "\x1B[5m"
 #define ANSI_REVERSE    "\x1B[7m"
+#define ANSI_UNDER_O    "\x1B[24m"
+#define ANSI_BLINK_O    "\x1B[25m"
+#define ANSI_REVERSE_O  "\x1B[27m"
 
 #define ANSI_F_BLK     "\x1B[30m"
 #define ANSI_F_RED     "\x1B[31m"
