@@ -29,8 +29,6 @@ CXXFLAGS = -Wall -Wextra -Wno-unused-parameter --std=c++11 -g
 INCLUDE = -I$(PROOT)/inc
 LIBS   = -L$(LIBDIR) -lbtn
 
-CFLAGS +=-DDEBUG
-
 SOURCES += $(shell find $(SRCDIR) -name '*.c')
 SOURCES += $(shell find $(SRCDIR) -name '*.cpp')
 BIN = lib$(MODULE).a
