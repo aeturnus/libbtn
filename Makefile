@@ -24,7 +24,7 @@ LD = x86_64-w64-mingw32-ld
 AR = x86_64-w64-mingw32-ar
 endif
 
-CFLAGS = -Wall -Wextra -Wno-unused-parameter --std=c99 -g -DPLATFORM=$(PLATFORM)
+CFLAGS = -Wall -Wextra -Wno-unused-parameter --std=c99 -g -DPLATFORM_$(PLATFORM)
 CXXFLAGS = -Wall -Wextra -Wno-unused-parameter --std=c++11 -g
 INCLUDE = -I$(PROOT)/inc
 LIBS   = -L$(LIBDIR) -lbtn

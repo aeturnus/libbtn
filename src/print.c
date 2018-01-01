@@ -1,15 +1,16 @@
+#if defined PLATFORM_WINDOWS
+#define DEF_STRIP true
+#elif defined PLATFORM_UNIX
+#define _POSIX_C_SOURCE 1
+#include <unistd.h>
+#define DEF_STRIP (!isatty(fileno(stream)))
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdarg.h>
 #include <string.h>
-
-#if PLATFORM==WINDOWS
-#define DEF_STRIP true
-#elif PLATFORM==UNIX
-#include <unistd.h>
-#define DEF_STRIP (!isatty(fileno(stream)))
-#endif
 
 static
 void strip_ansi(char * buf, size_t len)
