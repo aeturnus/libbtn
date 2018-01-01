@@ -24,6 +24,8 @@ void strip_ansi(char * buf, size_t len)
                 c = buf[++r];
             }
             ++r;
+            continue;   // continue: may have multiple codes adjacent
+                        // so need to start another check
         }
         buf[w++] = buf[r++];
     }
