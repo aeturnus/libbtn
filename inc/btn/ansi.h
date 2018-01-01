@@ -24,6 +24,15 @@ extern "C" {
 #define ANSI_F_CYN     "\x1B[36m"
 #define ANSI_F_WHT     "\x1B[37m"
 
+#define ANSI_F_BBLK     "\x1B[90m"
+#define ANSI_F_BRED     "\x1B[91m"
+#define ANSI_F_BGRN     "\x1B[92m"
+#define ANSI_F_BYEL     "\x1B[93m"
+#define ANSI_F_BBLU     "\x1B[94m"
+#define ANSI_F_BMAG     "\x1B[95m"
+#define ANSI_F_BCYN     "\x1B[96m"
+#define ANSI_F_BWHT     "\x1B[97m"
+
 #define ANSI_B_BLK     "\x1B[40m"
 #define ANSI_B_RED     "\x1B[41m"
 #define ANSI_B_GRN     "\x1B[42m"
@@ -32,6 +41,15 @@ extern "C" {
 #define ANSI_B_MAG     "\x1B[45m"
 #define ANSI_B_CYN     "\x1B[46m"
 #define ANSI_B_WHT     "\x1B[47m"
+
+#define ANSI_B_BBLK     "\x1B[100m"
+#define ANSI_B_BRED     "\x1B[101m"
+#define ANSI_B_BGRN     "\x1B[102m"
+#define ANSI_B_BYEL     "\x1B[103m"
+#define ANSI_B_BBLU     "\x1B[104m"
+#define ANSI_B_BMAG     "\x1B[105m"
+#define ANSI_B_BCYN     "\x1B[106m"
+#define ANSI_B_BWHT     "\x1B[107m"
 
 #ifdef __cplusplus
 }
