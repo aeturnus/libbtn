@@ -6,11 +6,26 @@ SRCDIR = $(PROOT)/src
 
 MODULE = btn
 
+# conditional check in case a parent makefile has already set this
+ifeq ($(PLATFORM), )
+PLATFORM = UNIX
+#PLATFORM = WINDOWS
+endif
+
+ifeq ($(PLATFORM), UNIX)
 CC = gcc
 CXX = g++
 LD = ld
-CFLAGS =-Wall -Wextra -Wno-unused-parameter --std=c99 -g
-CXXFLAGS =-Wall -Wextra -Wno-unused-parameter --std=c++11 -g
+AR = ar
+else ifeq ($(PLATFORM), WINDOWS)
+CC = x86_64-w64-mingw32-gcc
+CXX = x86_64-w64-mingw32-g++
+LD = x86_64-w64-mingw32-ld
+AR = x86_64-w64-mingw32-ar
+endif
+
+CFLAGS = -Wall -Wextra -Wno-unused-parameter --std=c99 -g -DPLATFORM=$(PLATFORM)
+CXXFLAGS = -Wall -Wextra -Wno-unused-parameter --std=c++11 -g
 INCLUDE = -I$(PROOT)/inc
 LIBS   = -L$(LIBDIR) -lbtn
 
@@ -38,7 +53,7 @@ $(OBJDIR)/$(MODULE)/%.o:$(SRCDIR)/%.c
 
 $(LIBDIR)/$(BIN): $(OBJECTS)
 	mkdir -p $(LIBDIR)
-	ar rcs $(LIBDIR)/$(BIN) $(OBJECTS)
+	$(AR) rcs $(LIBDIR)/$(BIN) $(OBJECTS)
 	echo $(SRCDIR)
 	@echo "Library built"
 
@@ -54,6 +69,7 @@ gtest: $(BINDIR)/$(GTEST_BIN)
 
 test: $(BINDIR)/$(GTEST_BIN)
 	@$(BINDIR)/$(GTEST_BIN)
+	@rm -f temp.txt
 
 clean:
 	#rm -rf cscope
