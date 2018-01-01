@@ -12,8 +12,7 @@ extern "C" {
 #define ANSI_BOLD       "\x1B[1m"
 #define ANSI_UNDER      "\x1B[4m"
 #define ANSI_BLINK      "\x1B[5m"
-#define ANSI_REVERSE    "\x1B[5m"
-#define ANSI_CONCEALED  "\x1B[5m"
+#define ANSI_REVERSE    "\x1B[7m"
 
 #define ANSI_F_BLK     "\x1B[30m"
 #define ANSI_F_RED     "\x1B[31m"
