@@ -63,24 +63,27 @@ int aevfprintf(bool enable, FILE * stream, const char * format, va_list ap)
     return ret;
 }
 
+int aetvfprintf(bool in_enable, FILE * stream, const char * format, va_list ap)
+{
+    bool enable = DEF_ENABLE && in_enable;
+    int ret = aevfprintf(enable, stream, format, ap);
+    return ret;
+}
+
 int atfprintf(FILE * stream, const char * format, ...)
 {
-    bool enable = DEF_ENABLE;
-
     va_list ap;
     va_start(ap, format);
-    int ret = aevfprintf(enable, stream, format, ap);
+    int ret = aetvfprintf(true, stream, format, ap);
     va_end(ap);
     return ret;
 }
 
 int aetfprintf(bool in_enable, FILE * stream, const char * format, ...)
 {
-    bool enable = DEF_ENABLE && in_enable;
-
     va_list ap;
     va_start(ap, format);
-    int ret = aevfprintf(enable, stream, format, ap);
+    int ret = aetvfprintf(in_enable, stream, format, ap);
     va_end(ap);
     return ret;
 }

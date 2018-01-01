@@ -19,6 +19,12 @@ int atfprintf(FILE * stream, const char * format, ...);
 int aetfprintf(bool enable, FILE * stream, const char * format, ...);
 
 /**
+ * Prints to a file, stripping ANSI escape colors if it is not a TTY and
+ * enable is false. va_list version
+ */
+int aetvfprintf(bool enable, FILE * stream, const char * format, va_list ap);
+
+/**
  * Prints to a file, stripping ANSI escape colors if not enabled
  */
 int aefprintf(bool enable, FILE * stream, const char * format, ...);
