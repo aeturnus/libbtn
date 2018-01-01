@@ -51,3 +51,51 @@ TEST(print, afprintf_adjacent)
 
     ASSERT_STREQ(expect, buffer) << "ftell: " << len << std::endl << "read " << read << " bytes";
 }
+
+TEST(print, eafprintf_false)
+{
+    const char * print  = ANSI_F_RED "Red "
+                          ANSI_F_WHT "White "
+                          ANSI_F_BLU "Blue"
+                          ANSI_RESET;
+    const char * expect = "Red White Blue";
+
+    FILE * file = NULL;
+    file = fopen("temp.txt", "w");
+    eafprintf(false, file, print);
+    fclose(file);
+
+    static char buffer[128];
+    file = fopen("temp.txt", "r");
+    fseek(file, 0, SEEK_END);
+    long len = ftell(file);
+    fseek(file, 0, 0);
+    size_t read = fread(buffer, sizeof(char), len, file);
+    fclose(file);
+
+    ASSERT_STREQ(expect, buffer) << "ftell: " << len << std::endl << "read " << read << " bytes";
+}
+
+TEST(print, eafprintf_true)
+{
+    const char * print  = ANSI_F_RED "Red "
+                          ANSI_F_WHT "White "
+                          ANSI_F_BLU "Blue"
+                          ANSI_RESET;
+    const char * expect = print;
+
+    FILE * file = NULL;
+    file = fopen("temp.txt", "w");
+    eafprintf(true, file, print);
+    fclose(file);
+
+    static char buffer[128];
+    file = fopen("temp.txt", "r");
+    fseek(file, 0, SEEK_END);
+    long len = ftell(file);
+    fseek(file, 0, 0);
+    size_t read = fread(buffer, sizeof(char), len, file);
+    fclose(file);
+
+    ASSERT_STREQ(expect, buffer) << "ftell: " << len << std::endl << "read " << read << " bytes";
+}

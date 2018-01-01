@@ -1,9 +1,9 @@
 #if defined PLATFORM_WINDOWS
-#define DEF_STRIP true  // strip by default: command prompt can't handle colors
+#define DEF_ENABLE false // strip by default: command prompt can't handle colors
 #elif defined PLATFORM_UNIX
 #define _POSIX_C_SOURCE 1
 #include <unistd.h>
-#define DEF_STRIP (!isatty(fileno(stream)))
+#define DEF_ENABLE (isatty(fileno(stream)))
 #endif
 
 #include <stdio.h>
@@ -32,14 +32,12 @@ void strip_ansi(char * buf, size_t len)
     }
 }
 
-int afprintf(FILE * stream, const char * format, ...)
+int eavfprintf(bool enable, FILE * stream, const char * format, va_list ap)
 {
-    bool strip = DEF_STRIP;
-    bool contains_ansi = false;
-    size_t len = strlen(format);
     int ret = -1;
-
+    size_t len = strlen(format);
     // memory allocation only if needed
+    bool contains_ansi = false;
     for (size_t i = 0; i < len; ++i) {
         if (format[i] == '\x1B') {
             contains_ansi = true;
@@ -47,9 +45,7 @@ int afprintf(FILE * stream, const char * format, ...)
         }
     }
 
-    va_list ap;
-    va_start(ap, format);
-    if (strip && contains_ansi) {
+    if (!enable && contains_ansi) {
         // get our own working buffer to strip ANSI codes
         char * buf = (char *) malloc(sizeof(char *) * (len + 1));
         strcpy(buf, format);
@@ -63,6 +59,27 @@ int afprintf(FILE * stream, const char * format, ...)
         // just pass it off without changes
         ret = vfprintf(stream, format, ap);
     }
+
+    return ret;
+}
+
+int afprintf(FILE * stream, const char * format, ...)
+{
+    bool enable = DEF_ENABLE;
+    bool contains_ansi = false;
+
+    va_list ap;
+    va_start(ap, format);
+    int ret = eavfprintf(enable, stream, format, ap);
+    va_end(ap);
+    return ret;
+}
+
+int eafprintf(bool enable, FILE * stream, const char * format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    int ret = eavfprintf(enable, stream, format, ap);
     va_end(ap);
     return ret;
 }
