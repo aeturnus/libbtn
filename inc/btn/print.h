@@ -10,17 +10,23 @@ extern "C" {
 /**
  * Prints to a file, stripping ANSI escape colors if it is not a TTY
  */
-int afprintf(FILE * stream, const char * format, ...);
+int atfprintf(FILE * stream, const char * format, ...);
 
 /**
- * Prints to a file, stripping ANSI escape colors if enabled
+ * Prints to a file, stripping ANSI escape colors if it is not a TTY and
+ * enable is false
  */
-int eafprintf(bool enable, FILE * stream, const char * format, ...);
+int aetfprintf(bool enable, FILE * stream, const char * format, ...);
+
+/**
+ * Prints to a file, stripping ANSI escape colors if not enabled
+ */
+int aefprintf(bool enable, FILE * stream, const char * format, ...);
 
 /**
  * va_list version
  */
-int eavfprintf(bool enable, FILE * stream, const char * format, va_list ap);
+int aevfprintf(bool enable, FILE * stream, const char * format, va_list ap);
 
 #ifdef __cplusplus
 }

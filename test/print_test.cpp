@@ -4,7 +4,7 @@
 #include <btn/print.h>
 #include <btn/ansi.h>
 
-TEST(print, afprintf)
+TEST(print, atfprintf)
 {
     const char * print  = ANSI_F_RED "Red "
                           ANSI_F_WHT "White "
@@ -14,7 +14,7 @@ TEST(print, afprintf)
 
     FILE * file = NULL;
     file = fopen("temp.txt", "w");
-    afprintf(file, print);
+    atfprintf(file, print);
     fclose(file);
 
     static char buffer[128];
@@ -28,7 +28,7 @@ TEST(print, afprintf)
     ASSERT_STREQ(expect, buffer) << "ftell: " << len << std::endl << "read " << read << " bytes";
 }
 
-TEST(print, afprintf_adjacent)
+TEST(print, atfprintf_adjacent)
 {
     const char * print  = ANSI_F_RED "Red " ANSI_RESET
                           ANSI_F_WHT "White " ANSI_RESET
@@ -38,7 +38,7 @@ TEST(print, afprintf_adjacent)
 
     FILE * file = NULL;
     file = fopen("temp.txt", "w");
-    afprintf(file, print);
+    atfprintf(file, print);
     fclose(file);
 
     static char buffer[128];
@@ -52,7 +52,7 @@ TEST(print, afprintf_adjacent)
     ASSERT_STREQ(expect, buffer) << "ftell: " << len << std::endl << "read " << read << " bytes";
 }
 
-TEST(print, eafprintf_false)
+TEST(print, aefprintf_false)
 {
     const char * print  = ANSI_F_RED "Red "
                           ANSI_F_WHT "White "
@@ -62,7 +62,7 @@ TEST(print, eafprintf_false)
 
     FILE * file = NULL;
     file = fopen("temp.txt", "w");
-    eafprintf(false, file, print);
+    aefprintf(false, file, print);
     fclose(file);
 
     static char buffer[128];
@@ -76,7 +76,7 @@ TEST(print, eafprintf_false)
     ASSERT_STREQ(expect, buffer) << "ftell: " << len << std::endl << "read " << read << " bytes";
 }
 
-TEST(print, eafprintf_true)
+TEST(print, aefprintf_true)
 {
     const char * print  = ANSI_F_RED "Red "
                           ANSI_F_WHT "White "
@@ -86,7 +86,7 @@ TEST(print, eafprintf_true)
 
     FILE * file = NULL;
     file = fopen("temp.txt", "w");
-    eafprintf(true, file, print);
+    aefprintf(true, file, print);
     fclose(file);
 
     static char buffer[128];

@@ -32,7 +32,7 @@ void strip_ansi(char * buf, size_t len)
     }
 }
 
-int eavfprintf(bool enable, FILE * stream, const char * format, va_list ap)
+int aevfprintf(bool enable, FILE * stream, const char * format, va_list ap)
 {
     int ret = -1;
     size_t len = strlen(format);
@@ -63,23 +63,33 @@ int eavfprintf(bool enable, FILE * stream, const char * format, va_list ap)
     return ret;
 }
 
-int afprintf(FILE * stream, const char * format, ...)
+int atfprintf(FILE * stream, const char * format, ...)
 {
     bool enable = DEF_ENABLE;
-    bool contains_ansi = false;
 
     va_list ap;
     va_start(ap, format);
-    int ret = eavfprintf(enable, stream, format, ap);
+    int ret = aevfprintf(enable, stream, format, ap);
     va_end(ap);
     return ret;
 }
 
-int eafprintf(bool enable, FILE * stream, const char * format, ...)
+int aetfprintf(bool in_enable, FILE * stream, const char * format, ...)
+{
+    bool enable = DEF_ENABLE && in_enable;
+
+    va_list ap;
+    va_start(ap, format);
+    int ret = aevfprintf(enable, stream, format, ap);
+    va_end(ap);
+    return ret;
+}
+
+int aefprintf(bool enable, FILE * stream, const char * format, ...)
 {
     va_list ap;
     va_start(ap, format);
-    int ret = eavfprintf(enable, stream, format, ap);
+    int ret = aevfprintf(enable, stream, format, ap);
     va_end(ap);
     return ret;
 }
