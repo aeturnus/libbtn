@@ -122,14 +122,14 @@ bool vector_pop_back(vector * vec);
  * @param[out]  val     Where to store the item retrieved
  * @return true on success, false on failure
  */
-bool vector_front(vector * vec, void * val);
+bool vector_front(const vector * vec, void * val);
 
 /**
  * Gets item at the end of the vector
  * @param[out]  val     Where to store the item retrieved
  * @return true on success, false on failure
  */
-bool vector_back(vector * vec, void * val);
+bool vector_back(const vector * vec, void * val);
 
 /**
  * Retrieves an element
@@ -137,26 +137,26 @@ bool vector_back(vector * vec, void * val);
  * @param[out]  val     Where to copy element to
  * @return true on success, false on failure
  */
-bool vector_get(vector * vec, size_t idx, void * val);
+bool vector_get(const vector * vec, size_t idx, void * val);
 
 /**
  * Pointer equivalent of vector_front
  * @return  Pointer to front element; NULL if size == 0
  */
-void * vector_frontp(vector * vec);
+void * vector_frontp(const vector * vec);
 
 /**
  * Pointer equivalent of vector_back
  * @return  Pointer to back element; NULL if size == 0
  */
-void * vector_backp(vector * vec);
+void * vector_backp(const vector * vec);
 
 /**
  * Get a pointer to an element
  * @param[in]   idx     Index of element
  * @return true on success, false on failure
  */
-void * vector_getp(vector * vec, size_t idx);
+void * vector_getp(const vector * vec, size_t idx);
 
 /**
  * Stores an element
@@ -192,7 +192,7 @@ bool vector_erase(vector * vec, size_t idx);
  * Returns a copy of the array
  * @return Direct copy of the array
  */
-void * vector_to_array(vector * vec);
+void * vector_to_array(const vector * vec);
 
 #ifdef __cplusplus
 }

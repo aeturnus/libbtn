@@ -42,7 +42,7 @@ vector_it_ops vector_it_operations = {
 
 // Get the pointer to the element
 static inline
-void * element(vector * vec, int idx)
+void * element(const vector * vec, int idx)
 {
     void * out = vec->data + idx * vec->e_size;
     return out;
@@ -171,7 +171,7 @@ bool vector_pop_back(vector * vec)
     return true;
 }
 
-bool vector_front(vector * vec, void * val)
+bool vector_front(const vector * vec, void * val)
 {
     void * src = vector_frontp(vec);
     if (src == NULL)
@@ -182,7 +182,7 @@ bool vector_front(vector * vec, void * val)
     return true;
 }
 
-bool vector_back(vector * vec, void * val)
+bool vector_back(const vector * vec, void * val)
 {
     void * src = vector_backp(vec);
     if (src == NULL)
@@ -193,7 +193,7 @@ bool vector_back(vector * vec, void * val)
     return true;
 }
 
-bool vector_get(vector * vec, size_t idx, void * val)
+bool vector_get(const vector * vec, size_t idx, void * val)
 {
     void * src = vector_getp(vec, idx);
     if (src == NULL)
@@ -214,21 +214,21 @@ bool vector_put(vector * vec, size_t idx, const void * val)
     return true;
 }
 
-void * vector_frontp(vector * vec)
+void * vector_frontp(const vector * vec)
 {
     if (vec->size == 0)
         return NULL;
     return element(vec, 0);
 }
 
-void * vector_backp(vector * vec)
+void * vector_backp(const vector * vec)
 {
     if (vec->size == 0)
         return NULL;
     return element(vec, vec->size - 1);
 }
 
-void * vector_getp(vector * vec, size_t idx)
+void * vector_getp(const vector * vec, size_t idx)
 {
     if (vec->size == 0 || idx >= vec->size)
         return NULL;
@@ -277,7 +277,7 @@ bool vector_erase(vector * vec, size_t idx)
     return true;
 }
 
-void * vector_to_array(vector * vec)
+void * vector_to_array(const vector * vec)
 {
     size_t n = vec->e_size * vec->size;
     void * out = malloc(n);
