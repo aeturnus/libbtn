@@ -49,6 +49,7 @@ void bst_ctor(bst * tree,
 void bst_dtor(bst * tree)
 {
     bst_node_tree_delete(tree, tree->root);
+    bst_node_delete(tree, tree->root);
 }
 
 bool bst_insert(bst * tree, const void * key, const void * val)
@@ -194,6 +195,8 @@ bst_node * bst_node_new(bst * tree, const void * key, const void * val)
 
 void bst_node_delete(bst * tree, bst_node * node)
 {
+    if (node == NULL)
+        return;
     if (tree->key_dtor != NULL)
         tree->key_dtor(keyp(tree, node));
     if (tree->val_dtor != NULL)
