@@ -104,7 +104,10 @@ bool bst_erase(bst * tree, const void * key)
 bool bst_find(bst * tree, const void * key, void * val)
 {
     void * src = bst_findp(tree, key);
+    if (src == NULL)
+        return false;
     memcpy(val, src, tree->val_size);
+    return true;
 }
 
 void * bst_findp(bst * tree, const void * key)
