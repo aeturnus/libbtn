@@ -6,6 +6,7 @@ extern "C" {
 #endif
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 /**
  * Prints to a file, stripping ANSI escape colors if it is not a TTY
