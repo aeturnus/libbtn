@@ -5,6 +5,17 @@
 
 #include <btn/bst.h>
 
+static void bst_begin(bst * vec, bst_it * it);
+static void bst_end(bst * vec, bst_it * it);
+static void bst_it_next(bst_it * it, int n);
+static void bst_it_prev(bst_it * it, int n);
+static bool bst_it_insert(bst_it * it, const void * val);
+static bool bst_it_remove(bst_it * it);
+static bool bst_it_read(bst_it * it, void * dst);
+static void * bst_it_ptr(bst_it * it);
+static bool bst_it_is_begin(bst_it * it);
+static bool bst_it_is_end(bst_it * it);
+
 static bst_ops ops = {
     .map = {
         .insert = (bool (*)(void *, const void *, const void *)) bst_insert,
@@ -13,9 +24,25 @@ static bst_ops ops = {
         .erase  = (bool (*)(void *, const void *)) bst_erase,
         .size   = (size_t (*)(void *)) bst_size,
         .empty  = (bool (*)(void *)) bst_erase
+    },
+    .iterable = {
+        .begin = (void (*)(void *, void*)) bst_begin,
+        .end   = (void (*)(void *, void*)) bst_end
     }
 };
 
+static bst_it_ops it_ops = {
+    .iterator = {
+        .next   = (void (*)(void *, int)) bst_it_next,
+        .prev   = (void (*)(void *, int)) bst_it_prev,
+        .insert = (bool (*)(void *, const void *)) bst_it_insert,
+        .remove = (bool (*)(void *)) bst_it_remove,
+        .read   = (bool (*)(void *, void *)) bst_it_read,
+        .ptr    = (void * (*)(void *)) bst_it_ptr,
+        .is_begin   = (bool (*)(void *)) bst_it_is_begin,
+        .is_end     = (bool (*)(void *)) bst_it_is_end
+    }
+};
 
 struct _bst_node
 {
@@ -216,4 +243,181 @@ void bst_node_tree_delete(bst * tree, bst_node * root)
     bst_node_delete(tree, root->l);
     bst_node_tree_delete(tree, root->r);
     bst_node_delete(tree, root->r);
+}
+
+// iteration funcs
+
+static
+bst_node * bst_lowest(bst * tree)
+{
+    bst_node * prev = NULL;
+    bst_node * curr = tree->root;
+    while (curr != NULL) {
+        prev = curr;
+        curr = curr->l;
+    }
+    return prev;
+}
+
+static
+bst_node * bst_highest(bst * tree)
+{
+    bst_node * prev = NULL;
+    bst_node * curr = tree->root;
+    while (curr != NULL) {
+        curr = curr->r;
+    }
+    return prev;
+}
+
+static
+int bst_node_cmp(bst * tree, bst_node * n1, bst_node * n2)
+{
+    /*
+    if (n1 != NULL && n2 == NULL)
+        return -1;
+
+    if (n1 == NULL && n2 == NULL)
+        return 0;
+
+    if (n1 == NULL && n2 != NULL)
+        return 1;
+    */
+
+    void * k1  = keyp(tree, n1);
+    void * k2  = keyp(tree, n2);
+
+    return tree->key_cmp(k1, k2);
+}
+
+// return successor: returns NULL if no more
+static
+bst_node * bst_node_succ(bst * tree, bst_node * node)
+{
+    if (node == NULL)
+        return NULL;
+
+    // have a right child? traverse that child going left
+    if (node->r != NULL) {
+        bst_node * prev = node->r;
+        bst_node * curr = node->r->l;
+        while (curr != NULL) {
+            prev = curr;
+            curr = curr->l;
+        }
+        return prev;
+    }
+
+    // backtrack to find an ancestor that's greater
+    bst_node * curr = node;
+    while (curr->p != NULL) {
+        int cmp = bst_node_cmp(tree, curr, curr->p);
+        if (cmp < 0)
+            return curr->p;
+        else
+            curr = curr->p;
+    }
+    return NULL;
+}
+
+// if provided with a NULL node, it's assumed to be the 'end' node
+// return predecessor: returns NULL if no more
+static
+bst_node * bst_node_pred(bst * tree, bst_node * node)
+{
+    if (node == NULL) {
+        return bst_highest(tree);
+    }
+
+    // have a left child? traverse that child going right
+    if (node->l != NULL) {
+        bst_node * prev = node->l;
+        bst_node * curr = node->l->r;
+        while (curr != NULL) {
+            prev = curr;
+            curr = curr->r;
+        }
+        return prev;
+    }
+
+    // backtrack to find an ancestor that's greater
+    bst_node * curr = node;
+    while (curr->p != NULL) {
+        int cmp = bst_node_cmp(tree, curr, curr->p);
+        if (cmp > 0)
+            return curr->p;
+        else
+            curr = curr->p;
+    }
+    return NULL;
+}
+
+static void
+bst_begin(bst * tree, bst_it * it)
+{
+    it->tree = tree;
+    it->curr = bst_lowest(tree);
+    it->ops  = &it_ops;
+}
+
+static void bst_end(bst * tree, bst_it * it)
+{
+    it->tree = tree;
+    it->curr = NULL;
+    it->ops  = &it_ops;
+}
+
+static void bst_it_next(bst_it * it, int n)
+{
+    if (n < 0) {
+        bst_it_prev(it, -n);
+    }
+
+    for (; n > 0 && it->curr != NULL; --n) {
+        it->curr = bst_node_succ(it->tree, it->curr);
+    }
+}
+
+static void bst_it_prev(bst_it * it, int n)
+{
+    if (n < 0) {
+        bst_it_next(it, -n);
+    }
+
+    bst_node * prev = NULL;
+    for (; n > 0 && it->curr != prev; --n) {
+        prev = it->curr;
+        it->curr = bst_node_pred(it->tree, it->curr);
+    }
+}
+
+static bool bst_it_insert(bst_it * it, const void * val)
+{
+    return false;
+}
+
+static bool bst_it_remove(bst_it * it)
+{
+    return false;
+}
+
+static bool bst_it_read(bst_it * it, void * dst)
+{
+    memcpy(dst, &it->curr, sizeof(bst_node *));
+    return true;
+}
+
+static void * bst_it_ptr(bst_it * it)
+{
+    return &(it->curr);
+}
+
+static bool bst_it_is_begin(bst_it * it)
+{
+    return (it->curr == bst_lowest(it->tree));
+}
+
+static bool bst_it_is_end(bst_it * it)
+{
+    return (it->curr == NULL);
 }

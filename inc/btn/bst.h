@@ -5,12 +5,14 @@
 extern "C" {
 #endif
 #include <btn/map.h>
+#include <btn/iterator.h>
 
 #define bst(key_type, val_type) bst
 
 typedef struct _bst_ops
 {
     map_ops map;
+    iterable_ops iterable;
 } bst_ops;
 
 struct _bst_node;
@@ -33,6 +35,23 @@ typedef struct _bst
     // vtable
     bst_ops * ops;
 } bst;
+
+typedef struct _bst_it_ops
+{
+    iterator_ops iterator;
+} bst_it_ops;
+
+// NOTE: BST iterator will provide bst_node pointers
+// read will write a bst_node *
+// readp will provide a bst_node **
+typedef struct _bst_it
+{
+    bst * tree;
+    bst_node * curr;
+
+    // vtable
+    bst_it_ops * ops;
+} bst_it;
 
 /**
  * Constructs a binary search tree
