@@ -73,18 +73,18 @@ typedef struct _iterable_ops
 } iterable_ops;
 
 // Iterator methods: "it" is a pointer
-#define it_next(it, n) (it)->ops->iterator.next(it, n)
-#define it_prev(it, n) (it)->ops->iterator.prev(it, n)
-#define it_insert(it, val) (it)->ops->iterator.insert(it, val)
-#define it_remove(it) (it)->ops->iterator.remove(it)
-#define it_read(it, dst) (it)->ops->iterator.read(it, dst)
-#define it_ptr(it) (it)->ops->iterator.ptr(it)
-#define it_is_begin(it) (it)->ops->iterator.is_begin(it)
-#define it_is_end(it) (it)->ops->iterator.is_end(it)
+#define it_next(_it, _n) (_it)->ops->iterator.next(_it, _n)
+#define it_prev(_it, _n) (_it)->ops->iterator.prev(_it, _n)
+#define it_insert(_it, _val) (_it)->ops->iterator.insert(_it, _val)
+#define it_remove(_it) (_it)->ops->iterator.remove(_it)
+#define it_read(_it, _dst) (_it)->ops->iterator.read(_it, _dst)
+#define it_ptr(_it) (_it)->ops->iterator.ptr(_it)
+#define it_is_begin(_it) (_it)->ops->iterator.is_begin(_it)
+#define it_is_end(_it) (_it)->ops->iterator.is_end(_it)
 
 // Iterable methods: "ds" and "it" are pointers
-#define it_begin(ds, it) (ds)->ops->iterable.begin(ds, it)
-#define it_end(ds, it) (ds)->ops->iterable.end(ds, it)
+#define it_begin(_ds, _it) (_ds)->ops->iterable.begin(_ds, _it)
+#define it_end(_ds, _it) (_ds)->ops->iterable.end(_ds, _it)
 
 #ifdef __cplusplus
 }
